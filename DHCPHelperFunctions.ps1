@@ -1,0 +1,48 @@
+﻿Function Get-IPv4Scopes
+<#
+	.SYNOPSIS
+		Read IPv4Scopes from an array of servers
+	.PARAMETER Servers
+		Specifies an array of servers
+	.PARAMETER Unique
+		Returns only one entry for each scope
+
+#>
+{
+    [CmdletBinding()]
+    Param(
+    # 1
+    [parameter(
+        Mandatory=$true,
+        Position=0,
+        ValueFromPipelineByPropertyName=$true,
+        HelpMessage="Server List"
+        )]
+    [string[]]$Servers,
+    #2
+    [parameter(Mandatory=$false,ValueFromPipeline=$false)]
+    [bool]$Unique=$false
+    )  #EndParam
+
+    Begin {}
+
+    Process {
+        $arrayJobs=@()
+        foreach ($server in $Servers) {
+            $arrayJobs+=Invoke-Command -ComputerName $server -scriptblock {Get-DhcpServerv4Scope}  -AsJob
+        }
+        $complete=$false
+        while (-not $complete) {
+            $arrayJobsInProgress= $arrayJobs | Where-Object { $_.State -match 'running' }
+            if (-not $arrayJobsInProgress) { $complete=$true }
+        }
+        $Scopes=$arrayJobs|Receive-Job
+        $UniqueScopes=$Scopes|Sort-Object -Property ScopeId -Unique
+    }
+
+    End {
+        if ($Unique) { return $UniqueScopes }
+        else { return $Scopes }
+    }
+
+}
