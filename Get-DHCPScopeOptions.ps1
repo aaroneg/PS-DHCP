@@ -1,14 +1,14 @@
 ﻿#Requires -Version 4.0
 #Get option values from a set of scopes
 
-try { Import-Module dhcpserver } catch {}
-if (!(get-module dhcpserver)) {throw "Missing DHCP Server Module"}
 $OptionNumber1=186
 $OptionNumber2=190
+$CSVFile="$PSScriptRoot\ScopeInformation.csv"
+
+try { Import-Module dhcpserver } catch {}
+if (!(get-module dhcpserver)) {throw "Missing DHCP Server Module"}
 
 $allServers=Get-DhcpServerInDC; $DHCPServers=@(); foreach($s in $allServers) { $DHCPServers+=$s.dnsname } # All DNS Servers
-
-###### No user editable content below this line ######
 . $PSScriptRoot\DHCPHelperFunctions.ps1
 
 $Results=@()
@@ -27,4 +27,4 @@ foreach ($Scope in $Scopes) {
     $Results+=$ret
 }
 $Results|ft
-$Results|Export-Csv -Path $PSScriptRoot\ScopeInformation.csv -NoTypeInformation
+$Results|Export-Csv -Path $CSVFile -NoTypeInformation
