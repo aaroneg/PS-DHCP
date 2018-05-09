@@ -8,6 +8,7 @@ $ThisDir=$PSScriptRoot
 
 if (!$Scopes) {$Scopes=Get-IPv4Scopes -Servers $DHCPServers -Unique $false}
 if (!$Leases) {$Leases=Get-IPv4Leases -Scopes $Scopes}
+# When I used this script last, this was a reliable way to find only wyse thin clients by mac address.
 $ThinClientLeases=$Leases|Where-Object {$_.ClientId -like "00-80-64-*"}
 
 $Leases|Export-Csv -Path "$PSScriptRoot\AllLeases.csv" -NoTypeInformation
